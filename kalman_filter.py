@@ -1,7 +1,7 @@
 import numpy as np
 
 class KalmanFilter:
-    def __init__(self):
+    def __init__(self, x=None, cov=None):
         self.A = np.array([[1, 1, 0, 0],
                            [0, 1, 0, 0],
                            [0, 0, 1, 1],
@@ -20,19 +20,23 @@ class KalmanFilter:
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]])
         self.u = 0
-        self.x = np.array([[0], [1], [0], [1]])
+        if x is not None:
+            self.x = x
+        else:
+            self.x = np.array([[0], [1], [0], [1]])
         self.cov = self.P
 
         self.x_predicted = self.x
         self.cov_predicted = self.cov
 
     def predict(self):
-        self.x_predicted = self.A * self.x + self.B * self.u
-        self.cov_predicted = self.A * self.cov * self.A.T + self.Q
+        self.x_predicted = np.dot(self.A, self.x) + np.dot(self.B, self.u)
+        self.cov_predicted = np.dot(np.dot(self.A, self.cov), self.A.T) + self.Q
 
     def update(self, measurement):
-        S = self.H * self.cov_predicted * self.H.T + self.R
-        y = measurement - self.H * self.x_predicted
-        K = self.cov_predicted * self.H.T * np.linalg.pinv(S)
-        self.x = self.x_predicted + K * y
-        self.cov = (np.identity(self.P.shape[0]) - K * self.H) * self.cov_predicted
+        S = np.dot(np.dot(self.H, self.cov_predicted), self.H.T) + self.R
+        m = measurement.reshape(1, 2)
+        y = m.T - np.dot(self.H, self.x_predicted)
+        K = np.dot(np.dot(self.cov_predicted, self.H.T), np.linalg.pinv(S))
+        self.x = self.x_predicted + np.dot(K, y)
+        self.cov = np.dot((np.identity(self.P.shape[0]) - np.dot(K, self.H)), self.cov_predicted)

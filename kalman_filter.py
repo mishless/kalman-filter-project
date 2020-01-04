@@ -1,7 +1,7 @@
 import numpy as np
 
 class KalmanFilter:
-    def __init__(self, x=None, cov=None):
+    def __init__(self, x=None, R=None, Q=None, P=None, cov=None):
         self.A = np.array([[1, 1, 0, 0],
                            [0, 1, 0, 0],
                            [0, 0, 1, 1],
@@ -9,8 +9,13 @@ class KalmanFilter:
         self.B = 0
         self.H = np.array([[1, 0, 0, 0],
                            [0, 0, 1, 0]])
-        self.R = np.array([[1, 0],
-                           [0, 1]])
+        if R is not None:
+            self.R = np.eye(2)*R
+        else:
+            self.R = np.array([[1, 0],
+                               [0, 1]])
+        if Q is not None:
+            self.Q = Q
         self.Q = np.array([[1, 1, 0, 0],
                            [1, 1, 0, 0],
                            [0, 0, 1, 1],

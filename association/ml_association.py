@@ -44,7 +44,6 @@ class MLAssociation:
             plt.cla()
         c = np.argmax(phi)
         mah = nu[c].T.dot(Sinv).dot(nu[c])
-        print(mah)
         if mah > self.threshold:
             return nu[c]
         else:

@@ -22,7 +22,7 @@ class YOLOObjectDetection:
         height, width, channels = img.shape
 
         # Image scaling and R-B channel swapping
-        blob = cv2.dnn.blobFromImage(img, scalefactor=1/255, size=(416, 416),
+        blob = cv2.dnn.blobFromImage(img, scalefactor=1 / 255, size=(416, 416),
                                      mean=(0, 0, 0), swapRB=True, crop=False)
 
         # YOLO V3 input

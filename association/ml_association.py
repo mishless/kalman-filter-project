@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class MLAssociation:
@@ -28,7 +28,7 @@ class MLAssociation:
         phi = np.zeros(n)
         S = self.H.dot(self.Sigma_bar).dot(self.H.T) + self.R
         Sinv = np.linalg.pinv(S)
-        ctn = np.linalg.det(2 * np.pi * S)**(-0.5)
+        ctn = np.linalg.det(2 * np.pi * S) ** (-0.5)
         nu = np.zeros((n, 2))
         plt.cla()
         for i, (mx, my) in enumerate(measurements):

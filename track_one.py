@@ -1,13 +1,12 @@
 import csv
-from tqdm import tqdm
 from glob import glob
-from kalman_filter import KalmanFilter
-from expectation_maximisation import EM
+
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from yolo.yolo_object_detection import YOLOObjectDetection as FeaturesDetector
+from tqdm import tqdm
+
 from association.ml_association import MLAssociation as DataAssociation
+from kalman_filter import KalmanFilter
+from yolo.yolo_object_detection import YOLOObjectDetection as FeaturesDetector
 
 
 def main():
@@ -71,7 +70,7 @@ def main():
             f"Predited position: {kf.x[0][0], kf.x[2][0]}, Ground truth position: {gt[0], gt[1]}")
         diff += np.linalg.norm([kf.x[0][0] - gt[0], kf.x[2][0] - gt[1]], axis=0)
 
-    print(diff/len(images_filelist))
+    print(diff / len(images_filelist))
 
 
 if __name__ == '__main__':

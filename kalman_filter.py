@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class KalmanFilter:
     def __init__(self, x=None, R=None, Q=None, P=None, cov=None):
         self.A = np.array([[1, 1, 0, 0],
@@ -10,7 +11,7 @@ class KalmanFilter:
         self.H = np.array([[1, 0, 0, 0],
                            [0, 0, 1, 0]])
         if R is not None:
-            self.R = np.eye(2)*R
+            self.R = np.eye(2) * R
         else:
             self.R = np.array([[1, 0],
                                [0, 1]])

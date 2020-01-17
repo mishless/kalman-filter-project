@@ -1,6 +1,7 @@
-import numpy as np
-import cv2
 import argparse
+
+import cv2
+import numpy as np
 
 parser = argparse.ArgumentParser(
     description="Run YOLO V3 on input image and show result in popup window")
@@ -21,7 +22,7 @@ img = cv2.imread(args.input_image)
 height, width, channels = img.shape
 
 # Image scaling and R-B channel swapping
-blob = cv2.dnn.blobFromImage(img, scalefactor=1/255, size=(416, 416),
+blob = cv2.dnn.blobFromImage(img, scalefactor=1 / 255, size=(416, 416),
                              mean=(0, 0, 0), swapRB=True, crop=False)
 
 # YOLO V3 input
@@ -43,11 +44,11 @@ for i0, out in enumerate(outs):
             w = int(detection[2] * width)
             h = int(detection[3] * height)
 
-            x = int(center_x - w/2)
-            y = int(center_y - h/2)
+            x = int(center_x - w / 2)
+            y = int(center_y - h / 2)
 
             cv2.circle(img, (center_x, center_y), 10, (0, 255, 0), 2)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
 # Plot image with rectangle and circle
 cv2.imshow("bow", img)

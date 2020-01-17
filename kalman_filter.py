@@ -40,8 +40,13 @@ class KalmanFilter:
 
     def update(self, measurement):
         S = np.dot(np.dot(self.H, self.cov_predicted), self.H.T) + self.R
-        m = measurement.reshape(1, 2)
-        y = m.T - np.dot(self.H, self.x_predicted)
-        K = np.dot(np.dot(self.cov_predicted, self.H.T), np.linalg.pinv(S))
-        self.x = self.x_predicted + np.dot(K, y)
-        self.cov = np.dot((np.identity(self.P.shape[0]) - np.dot(K, self.H)), self.cov_predicted)
+        if measurement is None:
+            self.x = self.x_predicted
+            self.cov = self.cov_predicted
+        else:
+            m = measurement.reshape(1, 2)
+            y = m.T - np.dot(self.H, self.x_predicted)
+            K = np.dot(np.dot(self.cov_predicted, self.H.T), np.linalg.pinv(S))
+            self.x = self.x_predicted + np.dot(K, y)
+            self.cov = np.dot(
+                (np.identity(self.P.shape[0]) - np.dot(K, self.H)), self.cov_predicted)

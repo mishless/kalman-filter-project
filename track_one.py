@@ -2,6 +2,8 @@ import csv
 from glob import glob
 
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from tqdm import tqdm
 
 from association.ml_association import MLAssociation as DataAssociation
@@ -19,8 +21,8 @@ def main():
     images_filelist = glob(images_wildcard)
 
     # Sort them in ascending order
-    images_filelist = sorted(images_filelist, key=lambda x: int(
-        x.split('/')[-1].split('.')[0]))
+    images_filelist = sorted(images_filelist, key=lambda xx: int(
+        xx.split('/')[-1].split('.')[0]))
 
     # Extract all ground truths
     ground_truth = list(csv.reader(open(ground_truth_file)))
@@ -29,9 +31,19 @@ def main():
     x, y, w, h = initial_position
     x = int(x)
     y = int(y)
+    w = int(w)
+    h = int(h)
 
+    # img = plt.imread(images_filelist[0])
+    # plt.imshow(img)
+    # r = mpatches.Rectangle((x, y), w, h, linewidth=1, facecolor="none", edgecolor="red")
+    # ax = plt.gca()
+    # ax.add_patch(r)
+    # plt.show()
+
+    Q = np.diag([15, 10, 15, 10])
     # Initialize KF (x = [x, vx, y, vy])
-    kf = KalmanFilter(x=np.array([[x], [20], [y], [20]]))
+    kf = KalmanFilter(x=np.array([[x+w/2], [1], [y+y/2], [1]]), Q=Q)
 
     # Initialize features detector
     fd = FeaturesDetector()

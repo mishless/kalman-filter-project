@@ -17,10 +17,11 @@ class KalmanFilter:
                                [0, 1]])
         if Q is not None:
             self.Q = Q
-        self.Q = np.array([[1, 1, 0, 0],
-                           [1, 1, 0, 0],
-                           [0, 0, 1, 1],
-                           [0, 0, 1, 1]])
+        else:
+            self.Q = np.array([[1, 1, 0, 0],
+                               [1, 1, 0, 0],
+                               [0, 0, 1, 1],
+                               [0, 0, 1, 1]])
         self.P = np.array([[1, 0, 0, 0],
                            [0, 1, 0, 0],
                            [0, 0, 1, 0],
@@ -38,6 +39,7 @@ class KalmanFilter:
     def predict(self):
         self.x_predicted = np.dot(self.A, self.x) + np.dot(self.B, self.u)
         self.cov_predicted = np.dot(np.dot(self.A, self.cov), self.A.T) + self.Q
+        return self.x_predicted, self.cov_predicted
 
     def update(self, measurement):
         S = np.dot(np.dot(self.H, self.cov_predicted), self.H.T) + self.R

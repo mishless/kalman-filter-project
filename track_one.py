@@ -1,9 +1,11 @@
 import csv
+import matplotlib
+matplotlib.use("Qt5Cairo")
 from glob import glob
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+# import matplotlib.patches as mpatches
 from tqdm import tqdm
 
 from association.ml_association import MLAssociation as DataAssociation
@@ -41,7 +43,7 @@ def main():
     # ax.add_patch(r)
     # plt.show()
 
-    Q = np.diag([15, 10, 15, 10])
+    Q = np.diag([2, 2, 2, 2])
     # Initialize KF (x = [x, vx, y, vy])
     kf = KalmanFilter(x=np.array([[x+w/2], [1], [y+y/2], [1]]), Q=Q)
 
@@ -61,9 +63,11 @@ def main():
     features = {}
     t = tqdm(images_filelist[1:], desc="Processing")
 
-    da = DataAssociation(R=kf.R, H=kf.H, threshold=5)
+    da = DataAssociation(R=kf.R, H=kf.H, threshold=50)
 
+    plt.ion()
     for i, im in enumerate(t):
+        img = plt.imread(images_filelist[i])
         # Compute features
         features[i] = np.array(fd.compute_features(im))
 
@@ -78,9 +82,15 @@ def main():
 
         gt = list(map(int, ground_truth[i]))
 
+        plt.gca()
+        plt.cla()
+        plt.imshow(img)
+        plt.plot(kf.x[0][0], kf.x[2][0], marker='o', color='blue')
+        plt.pause(0.0001)
+
         print(
-            f"Predited position: {kf.x[0][0], kf.x[2][0]}, Ground truth position: {gt[0], gt[1]}")
-        diff += np.linalg.norm([kf.x[0][0] - gt[0], kf.x[2][0] - gt[1]], axis=0)
+            f"Predicted position: {kf.x[0][0], kf.x[2][0]}, Ground truth position: {gt[0] + w/2, gt[1] + h/2}")
+        diff += np.linalg.norm([kf.x[0][0] - gt[0] - w/2, kf.x[2][0] - gt[1] - h/2], axis=0)
 
     print(diff / len(images_filelist))
 

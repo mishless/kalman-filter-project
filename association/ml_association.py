@@ -30,21 +30,20 @@ class MLAssociation:
         Sinv = np.linalg.pinv(S)
         ctn = np.linalg.det(2 * np.pi * S) ** (-0.5)
         nu = np.zeros((n, 2))
-        plt.cla()
         for i, (mx, my) in enumerate(measurements):
-            plt.imshow(plt.imread(img))
-            plt.plot(self.mu_bar[0], self.mu_bar[2], marker='o', color='blue')
-            plt.plot(mx, my, marker='o', color='lightgreen')
-            plt.show()
             new_z = np.array([mx - self.mu_bar[0], my -
                               self.mu_bar[2]]).reshape(2, 1)
             nu[i] = np.ravel(new_z)
             p = ctn * np.exp(-0.5 * new_z.T.dot(Sinv).dot(new_z))
             phi[i] = p
-            plt.cla()
         c = np.argmax(phi)
+        plt.figure()
+        plt.imshow(plt.imread(img))
+        plt.plot(self.mu_bar[0], self.mu_bar[2], marker='o', color='blue')
+        plt.plot(measurements[c, 0], measurements[c, 1], marker='o', color='lightgreen')
+        plt.show()
         mah = nu[c].T.dot(Sinv).dot(nu[c])
-        if mah > self.threshold:
-            return nu[c]
+        if mah < self.threshold:
+            return measurements[c]
         else:
             return None

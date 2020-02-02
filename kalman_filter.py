@@ -53,3 +53,6 @@ class KalmanFilter:
             self.x = self.x_predicted + np.dot(K, y)
             self.cov = np.dot(
                 (np.identity(self.P.shape[0]) - np.dot(K, self.H)), self.cov_predicted)
+
+    def get_x(self):
+        return self.x[0][0], self.x[2][0]

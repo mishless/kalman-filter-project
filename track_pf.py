@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 # import matplotlib.patches as mpatches
 from tqdm import tqdm
 
-from association.ml_association import MLKalmanAssociation as DataAssociation
-from kalman_filter import KalmanFilter
+from association.ml_association import MLPFAssociation as DataAssociation
+from particle_filter import ParticleFilter
 from yolo.yolo_object_detection import YOLOObjectDetection as FeaturesDetector
 
 
@@ -27,6 +27,7 @@ def main():
     # Sort them in ascending order
     images_filelist = sorted(images_filelist, key=lambda xx: int(
         xx.split('/')[-1].split('.')[0]))
+    img = plt.imread(images_filelist[0])
 
     # Extract all ground truths
     ground_truth = list(csv.reader(open(ground_truth_file)))
@@ -45,9 +46,11 @@ def main():
     # ax.add_patch(r)
     # plt.show()
 
-    Q = np.diag([2, 2, 2, 2])
+    Q = 10 * np.eye(4)
+    R = 100 * np.eye(2)
     # Initialize KF (x = [x, vx, y, vy])
-    kf = KalmanFilter(x=np.array([[x + w / 2], [1], [y + y / 2], [1]]), Q=Q)
+    M = 10000
+    pf = ParticleFilter(num_particles=M, Q=Q, R=R, img_shape=img.shape, resample_mode="multinomial")
 
     # Initialize features detector
     fd = FeaturesDetector()
@@ -65,7 +68,15 @@ def main():
     features = {}
     t = tqdm(images_filelist[1:], desc="Processing")
 
-    da = DataAssociation(R=kf.R, H=kf.H, threshold=50)
+    da = DataAssociation(states=pf.S, R=pf.R, H=pf.H, threshold=1e-7)
+
+    # Plot initialized states
+    # x = pf.get_x().T
+    # plt.gca()
+    # plt.cla()
+    # plt.imshow(img)
+    # plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
+    # plt.pause(0.1)
 
     plt.ion()
     for i, im in enumerate(t):
@@ -74,27 +85,37 @@ def main():
         features[i] = np.array(fd.compute_features(im))
 
         # Do prediction
-        mu_bar, Sigma_bar = kf.predict()
+        pf.predict()
+
+        # Plot predicted
+        # plt.gca()
+        # plt.cla()
+        # plt.imshow(img)
+        # x = pf.S_bar[:, [0, 2]].T
+        # plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
+        # plt.xlim(0, img.shape[1])
+        # plt.ylim(0, img.shape[0])
+        # plt.pause(0.1)
 
         # Do data association
-        da.update_prediction(mu_bar, Sigma_bar)
-        m = da.associate(features[i])
+        psi, outlier, c = da.associate(features[i])
 
-        kf.update(m)
+        pf.update(psi, outlier, c)
 
         gt = list(map(int, ground_truth[i]))
+
+        x = pf.get_x().T
 
         plt.gca()
         plt.cla()
         plt.imshow(img)
-        plt.plot(kf.x[0][0], kf.x[2][0], marker='o', color='blue')
-        plt.pause(0.0001)
+        plt.gca().autoscale(False)
+        plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
+        plt.pause(0.1)
 
-        x = kf.get_x()
-
-        print(
-            f"Predicted position: {x[0], x[1]}, Ground truth position: {gt[0] + w / 2, gt[1] + h / 2}")
-        diff += np.linalg.norm([x[0] - gt[0] - w / 2, x[1] - gt[1] - h / 2], axis=0)
+        # print(
+        #     f"Predicted position: {pf.x[0][0], pf.x[2][0]}, Ground truth position: {gt[0] + w/2, gt[1] + h/2}")
+        # diff += np.linalg.norm([pf.x[0][0] - gt[0] - w/2, pf.x[2][0] - gt[1] - h/2], axis=0)
 
     print(diff / len(images_filelist))
 

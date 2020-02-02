@@ -50,7 +50,7 @@ def main():
     R = 100 * np.eye(2)
     # Initialize KF (x = [x, vx, y, vy])
     M = 10000
-    pf = ParticleFilter(num_particles=M, Q=Q, R=R, img_shape=img.shape, resample_mode="multinomial")
+    pf = ParticleFilter(num_particles=M, Q=Q, R=R, img_shape=img.shape, resample_mode="systematic")
 
     # Initialize features detector
     fd = FeaturesDetector()
@@ -81,8 +81,6 @@ def main():
     plt.ion()
     for i, im in enumerate(t):
         img = plt.imread(images_filelist[i])
-        # Compute features
-        features[i] = np.array(fd.compute_features(im))
 
         # Do prediction
         pf.predict()
@@ -96,6 +94,9 @@ def main():
         # plt.xlim(0, img.shape[1])
         # plt.ylim(0, img.shape[0])
         # plt.pause(0.1)
+
+        # Compute features
+        features[i] = np.array(fd.compute_features(im))
 
         # Do data association
         psi, outlier, c = da.associate(features[i])

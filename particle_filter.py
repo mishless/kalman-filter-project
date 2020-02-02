@@ -44,18 +44,21 @@ class ParticleFilter:
         self.img_shape = img_shape
 
     def update(self, psi, outlier, c):
-        # Reweight
-        self.reweight(psi, outlier, c)
+        if not np.any(outlier):
+            # Reweight
+            self.reweight(psi, outlier, c)
 
-        # Resample
-        if self.resample_mode is None:
-            self.S = self.S_bar
-        elif self.resample_mode == "multinomial":
-            self.multinomal_resample()
-        elif self.resample_mode == "systematic":
-            self.systematic_resample()
+            # Resample
+            if self.resample_mode is None:
+                self.S = self.S_bar
+            elif self.resample_mode == "multinomial":
+                self.multinomal_resample()
+            elif self.resample_mode == "systematic":
+                self.systematic_resample()
+            else:
+                raise NotImplementedError
         else:
-            raise NotImplementedError
+            self.assign_predicted()
 
     def predict(self):
         x = np.dot(self.S, self.A.T) + np.dot(self.u, self.B)
@@ -97,3 +100,6 @@ class ParticleFilter:
 
     def get_x(self):
         return self.S[:, [0, 2]]
+
+    def assign_predicted(self):
+        self.S[:] = self.S_bar

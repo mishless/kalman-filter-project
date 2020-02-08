@@ -84,7 +84,7 @@ class MLPFAssociation:
 
         psi = self.eta * np.exp(-0.5 * exps)
 
-        outlier = psi.mean(axis=0) < self.threshold
+        outlier = psi.max(axis=0) < self.threshold
 
         c = np.argmax(psi, axis=1)
 

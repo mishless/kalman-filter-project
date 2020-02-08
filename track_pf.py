@@ -2,18 +2,21 @@ import csv
 
 import matplotlib
 
+from expectation_maximisation import EM
+
 matplotlib.use("Qt5Cairo")
 from glob import glob
 
 import numpy as np
 import matplotlib.pyplot as plt
-# import matplotlib.patches as mpatches
+import matplotlib.patches as mpatches
 from tqdm import tqdm
 
 from association.ml_association import MLPFAssociation as DataAssociation
 from particle_filter import ParticleFilter
 from yolo.yolo_object_detection import YOLOObjectDetection as FeaturesDetector
 
+import scipy.stats as st
 
 def main():
     diff = 0
@@ -39,6 +42,12 @@ def main():
     w = int(w)
     h = int(h)
 
+    resample_every = 1
+    plot_particles = False
+    plot_features = True
+    extract_density = True
+    plot_density = True
+
     # img = plt.imread(images_filelist[0])
     # plt.imshow(img)
     # r = mpatches.Rectangle((x, y), w, h, linewidth=1, facecolor="none", edgecolor="red")
@@ -46,21 +55,21 @@ def main():
     # ax.add_patch(r)
     # plt.show()
 
-    Q = 10 * np.eye(4)
-    R = 100 * np.eye(2)
+    Q = 0.05 * np.eye(4)
+    R = 750 * np.eye(2)
     # Initialize KF (x = [x, vx, y, vy])
-    M = 10000
-    pf = ParticleFilter(num_particles=M, Q=Q, R=R, img_shape=img.shape, resample_mode="systematic")
+    M = 1000
+    pf = ParticleFilter(num_particles=M, R=R, Q=Q, img_shape=img.shape, resample_mode="multinomial")
 
     # Initialize features detector
     fd = FeaturesDetector()
 
     # Find Q using EM
     # em_obj = EM()
-    # data = np.array(measurements)
+    # data = np.array(ground_truth)[:, :2].astype(int)
     # likelihoods = em_obj.find_Q(data)
     # print(em_obj.kf.Q)
-    # kf.Q = em_obj.kf.Q
+    # pf.Q = em_obj.kf.Q.astype(int)*0.01
     # plt.plot(likelihoods)
     # plt.show()
 
@@ -68,7 +77,7 @@ def main():
     features = {}
     t = tqdm(images_filelist[1:], desc="Processing")
 
-    da = DataAssociation(states=pf.S, R=pf.R, H=pf.H, threshold=1e-7)
+    da = DataAssociation(states=pf.S, R=pf.R, H=pf.H, threshold=1e-5)
 
     # Plot initialized states
     # x = pf.get_x().T
@@ -78,9 +87,13 @@ def main():
     # plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
     # plt.pause(0.1)
 
+    fig, ax = plt.subplots(1, 1)
     plt.ion()
     for i, im in enumerate(t):
         img = plt.imread(images_filelist[i])
+        plt.gca()
+        plt.cla()
+        plt.imshow(img)
 
         # Do prediction
         pf.predict()
@@ -95,23 +108,58 @@ def main():
         # plt.ylim(0, img.shape[0])
         # plt.pause(0.1)
 
-        # Compute features
-        features[i] = np.array(fd.compute_features(im))
+        if i % resample_every == 0:
 
-        # Do data association
-        psi, outlier, c = da.associate(features[i])
+            # Compute features
+            features[i] = np.array(fd.compute_features(im))
 
-        pf.update(psi, outlier, c)
+            # Plot features
+            if plot_features:
+                for f in features[i]:
+                    r = mpatches.Rectangle((f[0] - w/2, f[1] - h/2), w, h, linewidth=1, linestyle="solid",
+                                           edgecolor="r", facecolor=None, fill=None)
+                    ax.add_patch(r)
 
-        gt = list(map(int, ground_truth[i]))
+
+            # Do data association
+            psi, outlier, c = da.associate(features[i])
+
+            pf.update(psi, outlier, c)
+
+        else:
+            pf.assign_predicted()
+
+        # gt = list(map(int, ground_truth[i]))
 
         x = pf.get_x().T
-
-        plt.gca()
-        plt.cla()
-        plt.imshow(img)
         plt.gca().autoscale(False)
-        plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
+        if extract_density:
+            # Extract x and y
+            X = x[:, 0]
+            Y = x[:, 1]
+            # Define the borders
+            deltaX = (max(X) - min(X)) / 10
+            deltaY = (max(Y) - min(Y)) / 10
+            xmin = 0
+            xmax = img.shape[1]
+            ymin = 0
+            ymax = img.shape[0]
+            # Create meshgrid
+            xx, yy = np.mgrid[xmin:xmax:100j, ymin:ymax:100j]
+
+            kernel = st.gaussian_kde(x)
+            positions = np.vstack([xx.ravel(), yy.ravel()])
+            f = np.reshape(kernel(positions).T, xx.shape)
+        if plot_particles:
+            plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
+        if plot_density and extract_density:
+            cfset = ax.contourf(xx, yy, f, cmap='coolwarm', alpha=0.2)
+            # ax.imshow(np.rot90(f), cmap='coolwarm')
+            cset = ax.contour(xx, yy, f, colors='k', alpha=0.2)
+            # ax.clabel(cset, inline=1, fontsize=10)
+            # ax.set_xlabel('X')
+            # ax.set_ylabel('Y')
+            # plt.title('2D Gaussian Kernel density estimation')
         plt.pause(0.1)
 
         # print(

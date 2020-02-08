@@ -153,9 +153,10 @@ def main():
         if plot_particles:
             plt.plot(x[0].astype(int), x[1].astype(int), 'g.')
         if plot_density and extract_density:
-            cfset = ax.contourf(xx, yy, f, cmap='coolwarm', alpha=0.2)
+            f[f < 1e-5] = np.nan
+            cfset = ax.contourf(xx, yy, f, cmap='coolwarm', alpha=0.5)
             # ax.imshow(np.rot90(f), cmap='coolwarm')
-            cset = ax.contour(xx, yy, f, colors='k', alpha=0.2)
+            cset = ax.contour(xx, yy, f, colors='k', alpha=0.5)
             # ax.clabel(cset, inline=1, fontsize=10)
             # ax.set_xlabel('X')
             # ax.set_ylabel('Y')

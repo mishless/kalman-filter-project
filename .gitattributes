@@ -1,3 +1,4 @@
 *.weights filter=lfs diff=lfs merge=lfs -text
 ssd filter=lfs diff=lfs merge=lfs -text
 yolo filter=lfs diff=lfs merge=lfs -text
+ssd/frozen_inference_graph.pb filter=lfs diff=lfs merge=lfs -text

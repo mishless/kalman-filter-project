@@ -97,7 +97,7 @@ def main():
                     iou = temp_iou
 
             results[dir].append(iou)
-            if should_plot
+            if should_plot:
                 gt_box = patches.Rectangle((int(gt[1]), int(gt[2])), int(gt[3]), int(gt[4]), linewidth=1,
                                            linestyle="solid", edgecolor="b", facecolor=None, fill=None)
                 ax.add_patch(gt_box)

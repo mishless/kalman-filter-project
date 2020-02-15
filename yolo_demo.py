@@ -1,56 +1,33 @@
 import argparse
-
 import cv2
-import numpy as np
+from yolo.yolo_object_detection import YOLOObjectDetection
+from glob import glob
+import matplotlib.pyplot as plt
+
 
 parser = argparse.ArgumentParser(
-    description="Run YOLO V3 on input image and show result in popup window")
-parser.add_argument("input_image", type=str,
-                    help="Image where to run YOLO V3 on")
+    description="Run YOLO on input folder and show result in popup window")
+parser.add_argument("input_dataset", type=str,
+                    help="Folder with images where to run YOLO on")
 args = parser.parse_args()
 
-# Load YOLO V3
-net = cv2.dnn.readNet("yolo/yolov3.weights",
-                      "yolo/yolov3.cfg")
-layer_names = net.getLayerNames()
+dataset = args.input_dataset
+ground_truth_file = dataset + "/groundtruth_rect.txt"
+images_wildcard = dataset + "/img/*.jpg"
+images_filelist = glob(images_wildcard)
 
-# Define the output layers
-outputLayers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+yolo_object = YOLOObjectDetection()
 
-# Load input image
-img = cv2.imread(args.input_image)
-height, width, channels = img.shape
+for image in images_filelist:
+    img = cv2.imread(image)
+    image_height, image_width, channels = img.shape
+    features = yolo_object.compute_features(img)
 
-# Image scaling and R-B channel swapping
-blob = cv2.dnn.blobFromImage(img, scalefactor=1 / 255, size=(416, 416),
-                             mean=(0, 0, 0), swapRB=True, crop=False)
+    for feature in features:
+        cv2.rectangle(img, (int(feature[0]), int(feature[1])), (int(feature[2]), int(feature[3])), (0, 255, 0), 2)
 
-# YOLO V3 input
-net.setInput(blob)
-
-# Outputs
-outs = net.forward(outputLayers)
-
-# Parse YOLO results. Draw circle and rectangle
-for i0, out in enumerate(outs):
-    for i1, detection in enumerate(out):
-        scores = detection[5:]
-        class_id = np.argmax(scores)
-        confidence = scores[class_id]
-        if confidence > 0.1:
-            center_x = int(detection[0] * width)
-            center_y = int(detection[1] * height)
-
-            w = int(detection[2] * width)
-            h = int(detection[3] * height)
-
-            x = int(center_x - w / 2)
-            y = int(center_y - h / 2)
-
-            cv2.circle(img, (center_x, center_y), 10, (0, 255, 0), 2)
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-# Plot image with rectangle and circle
-cv2.imshow("bow", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    plt.gca()
+    plt.cla()
+    plt.imshow(img)
+    plt.gca().autoscale(False)
+    plt.pause(0.1)

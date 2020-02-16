@@ -15,7 +15,7 @@ from yolo.yolo_object_detection import YOLOObjectDetection
 
 def get_iou(bb1, bb2):
     if bb1[0] > bb1[2] or bb1[1] > bb1[3] or bb2[0] > bb2[2] or bb2[1] > bb2[3]:
-        print("Not a valid box detected")
+        #print("Not a valid box detected")
         return 0
 
     x_left = max(bb1[0], bb2[0])

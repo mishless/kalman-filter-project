@@ -31,18 +31,19 @@ class MLKalmanAssociation:
         Sinv = np.linalg.pinv(S)
         ctn = np.linalg.det(2 * np.pi * S) ** (-0.5)
         nu = np.zeros((n, 2))
-        for i, (mx, my) in enumerate(measurements):
+        centers = list(map(lambda m: np.array([m[0] + (m[2] - m[0])/2, m[1] + (m[3] - m[1])/2]), measurements))
+        for i, (mx, my) in enumerate(centers):
             new_z = np.array([mx - self.mu_bar[0], my -
                               self.mu_bar[2]]).reshape(2, 1)
             nu[i] = np.ravel(new_z)
             p = ctn * np.exp(-0.5 * new_z.T.dot(Sinv).dot(new_z))
             phi[i] = p
-        c = np.argmax(phi)
-        mah = nu[c].T.dot(Sinv).dot(nu[c])
-        if mah < self.threshold:
-            return measurements[c]
-        else:
-            return None
+        if len(phi) > 0:
+            c = np.argmax(phi)
+            mah = nu[c].T.dot(Sinv).dot(nu[c])
+            if mah < self.threshold:
+                return centers[c]
+        return None
 
 
 class MLPFAssociation:

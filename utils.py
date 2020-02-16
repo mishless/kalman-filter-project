@@ -6,3 +6,5 @@ def rectify(array,
         col = array[:, c]
         col[col < b0] = b0
         col[col > b1] = b1
+
+defget_motp()

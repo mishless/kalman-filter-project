@@ -17,7 +17,7 @@ parser.add_argument("object_detector", choices=['ssd', 'yolo_full', 'yolo_tiny']
                     help="Specify which object detector was used in experiment")
 args = parser.parse_args()
 res = {}
-
+print("Kalman Filter Box tracking with R values 0.001, 0.01, 1, 10, 1000")
 for i, R_value in enumerate(R_values):
     j = 2
     Q_value = 1
@@ -48,6 +48,8 @@ for k, v in res.items():
         print(f"{v1.count(0)}/600", end=' & ')
     print()
 
+
+print("Kalman Filter Box tracking with Q values 0.001, 0.01, 1, 10, 1000")
 res = {}
 for j, Q_value in enumerate(Q_values):
     i = 2
@@ -78,3 +80,32 @@ for k, v in res.items():
     for i, v1 in enumerate(v):
         print(f"{v1.count(0)}/600", end = ' & ')
     print()
+res = {}
+print("Kalman Filter point tracking with R values 0.001, 0.01, 1, 10, 1000")
+for i, R_value in enumerate(R_values):
+    j = 2
+    Q_value = 1
+    with open(f"results/kalman_filter_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+        results[R_value] = pickle.load(f)
+        if keys is None:
+            keys = list(results[R_value].keys())
+    for key in keys:
+        if key not in res:
+            res[key] = []
+        ground_truth_file = dataset + key + "/groundtruth_rect.txt"
+        ground_truth = list(csv.reader(open(ground_truth_file)))
+        current_res = results[R_value][key]
+        res[key].append(results[R_value][key])
+
+for k, v in res.items():
+    print(f"{k}", end = ' & ')
+    for i, v1 in enumerate(v):
+        print(f"${format(np.mean(v1), '.1f')}\pm{format(np.std(v1), '.1f')}$", end = ' & ')
+        plt.plot(v1, label=f"R={R_values[i]}")
+        plt.xlabel("Frames")
+        plt.ylabel("Distance")
+    print()
+    plt.legend()
+    plt.savefig(f"results/{k}-varying-R.pdf", format="pdf", bbox_inches='tight')
+    plt.clf()
+

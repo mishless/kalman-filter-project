@@ -15,13 +15,14 @@ class KalmanFilter:
         else:
             self.R = np.array([[1, 0],
                                [0, 1]])
+
+        self.Q = np.array([[1, 1, 0, 0],
+                           [1, 1, 0, 0],
+                           [0, 0, 1, 1],
+                           [0, 0, 1, 1]])
         if Q is not None:
-            self.Q = Q
-        else:
-            self.Q = np.array([[1, 1, 0, 0],
-                               [1, 1, 0, 0],
-                               [0, 0, 1, 1],
-                               [0, 0, 1, 1]])
+            self.Q = self.Q * Q
+
         self.P = np.array([[1, 0, 0, 0],
                            [0, 1, 0, 0],
                            [0, 0, 1, 0],

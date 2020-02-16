@@ -74,17 +74,21 @@ class MLPFAssociation:
         z_hat = self.observation_model()
 
         # Difference
-        nu = z_hat.reshape(-1, 1, 2) - measurements.reshape(1, -1, 2)
+        nu = np.expand_dims(z_hat, 1) - np.expand_dims(measurements, 0)
 
         # Calculate Mahalonobis distance
         for i in range(n):
             for m in range(self.M):
                 cur_nu = nu[m, i]
-                exps[m, i] = cur_nu.reshape(1, -1).dot(self.Rinv).dot(cur_nu.reshape(-1, 1))
+                exps[m, i] = cur_nu.reshape(
+                    1, -1).dot(self.Rinv).dot(cur_nu.reshape(-1, 1))
 
         psi = self.eta * np.exp(-0.5 * exps)
 
-        outlier = psi.max(axis=0) < self.threshold
+        max_values = psi.max(axis=0)
+
+        outlier = max_values < self.threshold
+
 
         c = np.argmax(psi, axis=1)
 

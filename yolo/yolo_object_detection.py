@@ -3,7 +3,7 @@ import numpy as np
 
 
 class YOLOObjectDetection:
-    def __init__(self, confidence=0.2):
+    def __init__(self, type, confidence=0.2):
         self.confidence = confidence
 
         # Load YOLO V3

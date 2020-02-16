@@ -36,13 +36,15 @@ def get_iou(bb1, bb2):
 def main():
     parser = argparse.ArgumentParser(
         description="Run SSD on input folder and show result in popup window")
-    parser.add_argument("object_detector", choices=['ssd', 'yolo'],
+    parser.add_argument("object_detector", choices=['ssd', 'yolo_full', 'yolo_tiny'],
                         help="Specify which object detector network should be used")
     args = parser.parse_args()
     if args.object_detector == 'ssd':
         fd = SSDObjectDetection(frozen, pbtxt)
-    elif args.object_detector == 'yolo':
-        fd = YOLOObjectDetection()
+    elif args.object_detector == 'yolo_full':
+        fd = YOLOObjectDetection('full')
+    elif args.object_detector == 'yolo_tiny':
+        fd = YOLOObjectDetection('tiny')
 
     # Config
     should_plot = False
@@ -54,7 +56,6 @@ def main():
         all_directories = directories
         break
     results = {}
-    all_directories = ['CarChase2', 'Mohiniyattam', 'Drone1']
     for dir in all_directories:
         results[dir] = []
         ground_truth_file = dataset + dir + "/groundtruth_rect.txt"

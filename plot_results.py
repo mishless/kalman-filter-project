@@ -55,15 +55,15 @@ for j, Q_value in enumerate(Q_values):
     i = 2
     R_value = 1
     with open(f"results/kalman_filter_box_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
-        results[R_value] = pickle.load(f)
+        results[Q_value] = pickle.load(f)
         if keys is None:
-            keys = list(results[R_value].keys())
+            keys = list(results[Q_value].keys())
     for key in keys:
         if key not in res:
             res[key] = []
         ground_truth_file = dataset + key + "/groundtruth_rect.txt"
         ground_truth = list(csv.reader(open(ground_truth_file)))
-        current_res = results[R_value][key]
+        current_res = results[Q_value][key]
 
         zipped_res = list(zip(current_res,ground_truth))
         iou = list(map(lambda x: get_iou([int(x[0][0]), int(x[0][1]), int(x[0][0]) + int(x[0][2]), int(x[0][1]) + int(x[0][3])],
@@ -109,3 +109,31 @@ for k, v in res.items():
     plt.savefig(f"results/{k}-varying-R.pdf", format="pdf", bbox_inches='tight')
     plt.clf()
 
+res = {}
+print("Kalman Filter point tracking with Q values 0.001, 0.01, 1, 10, 1000")
+for j, Q_value in enumerate(Q_values):
+    i = 2
+    R_value = 1
+    with open(f"results/kalman_filter_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+        results[Q_value] = pickle.load(f)
+        if keys is None:
+            keys = list(results[Q_value].keys())
+    for key in keys:
+        if key not in res:
+            res[key] = []
+        ground_truth_file = dataset + key + "/groundtruth_rect.txt"
+        ground_truth = list(csv.reader(open(ground_truth_file)))
+        current_res = results[Q_value][key]
+        res[key].append(results[Q_value][key])
+
+for k, v in res.items():
+    print(f"{k}", end=' & ')
+    for i, v1 in enumerate(v):
+        print(f"${format(np.mean(v1), '.1f')}\pm{format(np.std(v1), '.1f')}$", end=' & ')
+        plt.plot(v1, label=f"Q={Q_values[i]}")
+        plt.xlabel("Frames")
+        plt.ylabel("Distance")
+    print()
+    plt.legend()
+    plt.savefig(f"results/{k}-varying-Q.pdf", format="pdf", bbox_inches='tight')
+    plt.clf()

@@ -3,7 +3,9 @@ import numpy as np
 
 
 class YOLOObjectDetection:
-    def __init__(self):
+    def __init__(self, confidence=0.5):
+        self.confidence = confidence
+
         # Load YOLO V3
         self.net = cv2.dnn.readNet("yolo/yolov3.weights",
                                    "yolo/yolov3.cfg")
@@ -32,14 +34,18 @@ class YOLOObjectDetection:
         outs = self.net.forward(self.outputLayers)
 
         # Parse YOLO results. Draw circle and rectangle
+        # Output: (xt, yt, xb, yb)
         for i0, out in enumerate(outs):
             for i1, detection in enumerate(out):
                 scores = detection[5:]
                 class_id = np.argmax(scores)
                 confidence = scores[class_id]
-                if confidence > 0.1:
+                if confidence > self.confidence:
                     center_x = int(detection[0] * width)
                     center_y = int(detection[1] * height)
-                    features.append(np.array([center_x, center_y]))
+                    width = int(detection[2] * width)
+                    height = int(detection[3] * height)
+                    features.append(np.array(
+                        [center_x - width/2, center_y - height/2, center_x + width/2, center_y + height/2]).astype(int))
 
         return features

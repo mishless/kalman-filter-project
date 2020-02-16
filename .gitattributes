@@ -2,3 +2,5 @@
 ssd filter=lfs diff=lfs merge=lfs -text
 yolo filter=lfs diff=lfs merge=lfs -text
 ssd/frozen_inference_graph.pb filter=lfs diff=lfs merge=lfs -text
+yolo/yolov3.weights filter=lfs diff=lfs merge=lfs -text
+ssd/faster-rcnn-inception-v2/frozen_inference_graph.pb filter=lfs diff=lfs merge=lfs -text

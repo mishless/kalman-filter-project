@@ -99,13 +99,12 @@ def test_pf(args):
                             if args.point_estimate:
                                 v = np.linalg.norm(
                                     [de.xtmean - gt[0] - gt[2]/2, de.ytmean - gt[1] - gt[3]/2], axis=0)
-                                t.set_description(f"Last error: {v}")
                             else:
                                 v = np.linalg.norm([de.xtmean - gt[1],
                                                     de.ytmean - gt[2],
                                                     (de.xbmean - de.xtmean) - gt[3],
                                                     (de.ybmean - de.ytmean) - gt[4]])
-                                t.set_description(f"Last error: {v:.2}")
+                            t.set_description(f"Last error: {v:3.4}")
                             errors.append(v)
                             iou.append(get_iou([de.xtmean, de.ytmean, de.xbmean, de.ybmean],
                                                [gt[1], gt[2], gt[1] + gt[3], gt[2] + gt[4]]))

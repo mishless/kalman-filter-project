@@ -113,7 +113,7 @@ def worker(args, q_ind, q_value, r_ind, r_value):
                     results_dir.append(
                         [de.xtmean, de.ytmean, de.xbmean - de.xtmean, de.ybmean - de.ytmean])
     except Exception as e:
-        print(f"Crashed with error: {str(e)}")
+        print(f"Crashed with error: {str(e)}. Q: {q_value}, R: {r_value}")
     finally:
         with open(f"results/pf_box_R_{r_ind}_Q_{q_ind}_{args.object_detector}.pickle", 'wb') as fp:
             pickle.dump(results, fp)

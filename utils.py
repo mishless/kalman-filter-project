@@ -48,8 +48,7 @@ def parse_arguments_pf():
                         help="Whether or not to plot the boxes")
     parser.add_argument("--resample_every", type=int, default=1,
                         help="n: resample once every n frames")
-    parser.add_argument(
-        "--plot_particles", help="Draw green dots on the particles positions", default=False)
+    parser.add_argument("--plot_particles", help="Draw green dots on the particles positions", action="store_true")
     parser.add_argument("--plot_ground_truth", help="Plot a yellow bounding box on the tracked object",
                         action="store_true")
     parser.add_argument("--plot_detector_output",
@@ -192,7 +191,7 @@ def plot_ground_truth(ax, gt):
     ax.add_patch(r)
 
 
-def plot(args, x=None, de=None, img=None, gt=None, detector_output=None):
+def plot(args, x=None, de=None, img=None, gt=None, detector_output=None, result_label="image"):
     plt.close()
     fig, ax = plt.subplots()
     ax.imshow(img)
@@ -237,7 +236,13 @@ def plot(args, x=None, de=None, img=None, gt=None, detector_output=None):
                                       edgecolor="b", facecolor=None, fill=None)
             ax.add_patch(r)
 
-    plt.show()
+    if args.show_plots:
+        plt.show()
+        return None
+    else:
+        filename = f"results/{result_label}.png"
+        plt.savefig(filename)
+        return filename
 
 
 def sort_images(unsorted_filelist):

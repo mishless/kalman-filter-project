@@ -6,12 +6,15 @@ from random import sample
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as patches
+from PIL import Image
 from tqdm import tqdm
 
 from constants import frozen, pbtxt
 from particle_filter import ParticleFilter
 from ssd.ssd import SSDObjectDetection
 from yolo.yolo_object_detection import YOLOObjectDetection
+
+from io import BytesIO
 
 
 def rectify(array,
@@ -42,8 +45,6 @@ def parse_arguments_pf():
         description="Run PF tests")
     parser.add_argument("object_detector", choices=['ssd', 'yolo_full', 'yolo_tiny'],
                         help="Specify which object detector network should be used")
-    parser.add_argument("test", choices=['Q', 'R'],
-                        help="Which noise matrix should be tested")
     parser.add_argument("--should_plot", action="store_true",
                         help="Whether or not to plot the boxes")
     parser.add_argument("--resample_every", type=int, default=1,
@@ -191,7 +192,7 @@ def plot_ground_truth(ax, gt):
     ax.add_patch(r)
 
 
-def plot(args, x=None, de=None, img=None, gt=None, detector_output=None, result_label="image"):
+def plot(args, x=None, de=None, img=None, gt=None, detector_output=None):
     plt.close()
     fig, ax = plt.subplots()
     ax.imshow(img)
@@ -236,13 +237,17 @@ def plot(args, x=None, de=None, img=None, gt=None, detector_output=None, result_
                                       edgecolor="b", facecolor=None, fill=None)
             ax.add_patch(r)
 
+    ax.axis("off")
+
     if args.show_plots:
         plt.show()
         return None
     else:
-        filename = f"results/{result_label}.png"
-        plt.savefig(filename)
-        return filename
+        buf = BytesIO()
+        fig.savefig(buf, format='png', dpi=300)
+        buf.seek(0)
+        img = Image.open(buf)
+        return img
 
 
 def sort_images(unsorted_filelist):

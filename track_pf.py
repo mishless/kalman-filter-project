@@ -1,12 +1,9 @@
-from tests_pf import test_pf_R, test_pf_Q
+from tests_pf import test_pf
 from utils import parse_arguments_pf
 
 
 def main(args):
-    if args.test == 'R':
-        test_pf_R(args)
-    else:
-        test_pf_Q(args)
+    test_pf(args)
 
 
 if __name__ == '__main__':

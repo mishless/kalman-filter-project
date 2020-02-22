@@ -110,9 +110,6 @@ def test_pf(args):
                                                [gt[1], gt[2], gt[1] + gt[3], gt[2] + gt[4]]))
                             results_dir.append(
                                 [de.xtmean, de.ytmean, de.xbmean - de.xtmean, de.ybmean - de.ytmean])
-                            break
-                        break
-                    break
             except Exception as e:
                 print(f"Crashed with error: {str(e)}")
             finally:

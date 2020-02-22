@@ -192,11 +192,14 @@ def plot_ground_truth(ax, gt):
     ax.add_patch(r)
 
 
-def plot(args, ax, x=None, de=None, img=None, gt=None, detector_output=None):
-    plt.gca()
-    plt.cla()
-    plt.imshow(img)
-    plt.gca().autoscale(False)
+def plot(args, x=None, de=None, img=None, gt=None, detector_output=None):
+    plt.close()
+    fig, ax = plt.subplots()
+    ax.imshow(img)
+    ax.autoscale(False)
+
+    if args.plot_detector_output:
+        plot_detector_output(ax, detector_output)
 
     if args.plot_ground_truth:
         plot_ground_truth(ax, gt)
@@ -212,21 +215,32 @@ def plot(args, ax, x=None, de=None, img=None, gt=None, detector_output=None):
     if args.extract_density:
         e = de.estimate(x)
         if args.point_estimate:
-            f, xmean, ymean = e
+            f, xtmean, ytmean = e
+            xbmean = ybmean = 0
         else:
-            f1, f2, xtmean, ytmean, xbmean, ybmean = e
+            f1, f2, (xtmean, ytmean), (xbmean, ybmean) = e
 
-        if args.plot_density:
-            f[f < 1e-5] = np.nan
-            cfset = ax.contourf(de.xx, de.yy, f, cmap='coolwarm', alpha=0.5)
-            cset = ax.contour(de.xx, de.yy, f, colors='k', alpha=0.5)
+        if args.plot_density and args.point_estimate:
+                f[f < 1e-5] = np.nan
+                cfset = ax.contourf(de.xx, de.yy, f, cmap='coolwarm', alpha=0.5)
+                cset = ax.contour(de.xx, de.yy, f, colors='k', alpha=0.5)
         if args.plot_detected_mean:
             if args.point_estimate:
                 w = gt[2]
                 h = gt[3]
+                r = patches.Rectangle((xtmean - w/2, ytmean - h/2), w, h, linewidth=1, linestyle="solid",
+                                      edgecolor="b", facecolor=None, fill=None)
             else:
                 w = xbmean - xtmean
                 h = ybmean - ytmean
-            r = patches.Rectangle((xmean - w/2, ymean - h/2), w, h, linewidth=1, linestyle="solid",
-                                  edgecolor="b", facecolor=None, fill=None)
+                r = patches.Rectangle((xtmean, ytmean), w, h, linewidth=1, linestyle="solid",
+                                      edgecolor="b", facecolor=None, fill=None)
             ax.add_patch(r)
+
+    plt.show()
+
+
+def sort_images(unsorted_filelist):
+    def extract_id(filename):
+        return int(filename.split(".")[0].split("/")[-1])
+    return sorted(unsorted_filelist, key=extract_id)

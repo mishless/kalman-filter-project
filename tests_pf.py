@@ -30,8 +30,8 @@ def worker(args, q_ind, q_value, r_ind, r_value):
     dataset = "data/TinyTLP/"
     all_directories = get_directories(dataset)
     results = {}
-    try:
-        for directory in all_directories:
+    for directory in all_directories:
+        try:
             results_dir = results[directory] = []
             plotted = results[f"{directory}_plots"] = []
             iou = results[f"{directory}_iou"] = []
@@ -42,6 +42,7 @@ def worker(args, q_ind, q_value, r_ind, r_value):
 
             images_filelist = sort_images(images_filelist)
 
+            de = None
             if args.extract_density:
                 de = DensityExtractor(images_filelist[0], args)
                 de.create_grid()
@@ -112,8 +113,7 @@ def worker(args, q_ind, q_value, r_ind, r_value):
                                        [gt[1], gt[2], gt[1] + gt[3], gt[2] + gt[4]]))
                     results_dir.append(
                         [de.xtmean, de.ytmean, de.xbmean - de.xtmean, de.ybmean - de.ytmean])
-    except Exception as e:
-        print(f"Crashed with error: {str(e)}. Q: {q_value}, R: {r_value}")
-    finally:
-        with open(f"results/pf_box_R_{r_ind}_Q_{q_ind}_{args.object_detector}.pickle", 'wb') as fp:
-            pickle.dump(results, fp)
+        except Exception as e:
+            print(f"Crashed with error: {str(e)}. Q: {q_value}, R: {r_value}")
+    with open(f"results/pf_box_R_{r_ind}_Q_{q_ind}_{args.object_detector}.pickle", 'wb') as fp:
+        pickle.dump(results, fp)

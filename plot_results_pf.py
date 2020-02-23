@@ -1,14 +1,13 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from tabulate import tabulate
 import csv
 from find_datasets import get_iou
 import argparse
+from constants import R_values, Q_values
 
 # Particle Filter results with Tiny YOLO and varying R
-R_values = [0.001, 0.1, 1, 10, 1000]
-Q_values = [0.001, 0.1, 1, 10, 1000]
+
 results = {}
 keys = None
 dataset = "data/TinyTLP/"
@@ -22,8 +21,9 @@ for i, R_value in enumerate(R_values):
     j = 2
     Q_value = 1
     try:
-        with open(f"results/particle_filter_box_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
-            results[R_value] = pickle.load(f)
+        with open(f"results/pf_box_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+            boxes = {k: v for k, v in pickle.load(f).items() if not (k.endswith("_plots") or k.endswith("_iou") or k.endswith("_errors"))}
+            results[R_value] = boxes
             if keys is None:
                 keys = list(results[R_value].keys())
         for key in keys:
@@ -58,8 +58,9 @@ for j, Q_value in enumerate(Q_values):
     i = 2
     R_value = 1
     try:
-        with open(f"results/particle_filter_box_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
-            results[Q_value] = pickle.load(f)
+        with open(f"results/pf_box_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+            boxes = {k: v for k, v in pickle.load(f).items() if not (k.endswith("_plots") or k.endswith("_iou") or k.endswith("_errors"))}
+            results[Q_value] = boxes
             if keys is None:
                 keys = list(results[Q_value].keys())
         for key in keys:
@@ -92,7 +93,7 @@ for i, R_value in enumerate(R_values):
     j = 2
     Q_value = 1
     try:
-        with open(f"results/particle_filter_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+        with open(f"results/pf_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
             results[R_value] = pickle.load(f)
             if keys is None:
                 keys = list(results[R_value].keys())
@@ -124,7 +125,7 @@ for j, Q_value in enumerate(Q_values):
     i = 2
     R_value = 1
     try:
-        with open(f"results/particle_filter_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+        with open(f"results/pf_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
             results[Q_value] = pickle.load(f)
             if keys is None:
                 keys = list(results[Q_value].keys())
@@ -147,5 +148,5 @@ for k, v in res.items():
         plt.ylabel("Distance")
     print()
     plt.legend()
-    plt.savefig(f"results/{k}-varying-Q.pdf", format="pdf", bbox_inches='tight')
+    plt.savefig(f"results/pf_{k}-varying-Q.pdf", format="pdf", bbox_inches='tight')
     plt.clf()

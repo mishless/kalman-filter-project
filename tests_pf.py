@@ -19,10 +19,14 @@ def test_pf(args):
     n = 4 if args.point_estimate else 8
     from constants import Q_values, R_values
     Q_values = [q*np.eye(n) for q in Q_values]
-    R_values = [r*np.eye(4) for r in R_values]
+    rn = 2 if args.point_estimate else 2
+    R_values = [r*np.eye(rn) for r in R_values]
 
     Parallel(n_jobs=4)(delayed(worker)(args, q_ind, q_value, r_ind, r_value) for q_ind, q_value in enumerate(Q_values)
                        for r_ind, r_value in enumerate(R_values))
+    # for q_ind, q_value in enumerate(Q_values):
+    #     for r_ind, r_value in enumerate(R_values):
+    #         worker(args, q_ind, q_value, r_ind, r_value)
 
 
 def worker(args, q_ind, q_value, r_ind, r_value):
@@ -102,6 +106,7 @@ def worker(args, q_ind, q_value, r_ind, r_value):
                     if args.point_estimate:
                         v = np.linalg.norm(
                             [de.xtmean - gt[0] - gt[2]/2, de.ytmean - gt[1] - gt[3]/2], axis=0)
+                        results_dir.append(v)
                     else:
                         v = np.linalg.norm([de.xtmean - gt[1],
                                             de.ytmean - gt[2],
@@ -109,10 +114,11 @@ def worker(args, q_ind, q_value, r_ind, r_value):
                                             (de.ybmean - de.ytmean) - gt[4]])
                     t.set_description(f"Last error: {v:3.4}")
                     errors.append(v)
-                    iou.append(get_iou([de.xtmean, de.ytmean, de.xbmean, de.ybmean],
-                                       [gt[1], gt[2], gt[1] + gt[3], gt[2] + gt[4]]))
-                    results_dir.append(
-                        [de.xtmean, de.ytmean, de.xbmean - de.xtmean, de.ybmean - de.ytmean])
+                    if not args.point_estimate:
+                        iou.append(get_iou([de.xtmean, de.ytmean, de.xbmean, de.ybmean],
+                                           [gt[1], gt[2], gt[1] + gt[3], gt[2] + gt[4]]))
+                        results_dir.append(
+                            [de.xtmean, de.ytmean, de.xbmean - de.xtmean, de.ybmean - de.ytmean])
         except Exception as e:
             print(f"Crashed with error: {str(e)}. Q: {q_value}, R: {r_value}")
     if args.point_estimate:

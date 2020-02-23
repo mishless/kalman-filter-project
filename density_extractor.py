@@ -24,7 +24,7 @@ class DensityExtractor:
         """
         if self.point_estimate:
             kernel = st.gaussian_kde(data)
-            f = np.reshape(kernel(self.positions).T, self.xx.shape)
+            f = np.reshape(kernel(self.positions).T, self.xx[0].shape)
             imean = np.argmax(f)
             xtmean = int(round(self.xx[0][imean // self.resolution, imean % self.resolution]))
             self.xtmean = xtmean

@@ -215,7 +215,7 @@ def plot(args, x=None, de=None, img=None, gt=None, detector_output=None):
     if args.extract_density:
         e = de.estimate(x)
         if args.point_estimate:
-            f, xtmean, ytmean = e
+            f, (xtmean, ytmean) = e
             xbmean = ybmean = 0
         else:
             f1, f2, (xtmean, ytmean), (xbmean, ybmean) = e

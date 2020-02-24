@@ -2,6 +2,7 @@ import pickle
 from glob import glob
 
 import numpy as np
+from scipy.stats import mode
 
 from association.ml_association import MLPFAssociation
 from density_extractor import DensityExtractor
@@ -23,12 +24,31 @@ def test_pf(args):
     R_values = [r*np.eye(rn) for r in R_values]
 
     fixed_q = Q_values[2]
-    Parallel(n_jobs=4)(delayed(worker)(args, 2, fixed_q, r_ind, r_value)
+    Parallel(n_jobs=1)(delayed(worker)(args, 2, fixed_q, r_ind, r_value)
                        for r_ind, r_value in enumerate(R_values))
 
     fixed_r = R_values[2]
-    Parallel(n_jobs=4)(delayed(worker)(args, q_ind, q_value, 2, fixed_r)
+    Parallel(n_jobs=1)(delayed(worker)(args, q_ind, q_value, 2, fixed_r)
                        for q_ind, q_value in enumerate(Q_values))
+
+
+class GaussianDensityExtractor:
+    def __init__(self, a, b):
+        self.xtmean = None
+        self.ytmean = None
+        self.xbmean = None
+        self.ybmean = None
+
+    def create_grid(self):
+        pass
+
+    def estimate(self, x):
+        if x.shape[0] == 2:
+            self.xtmean, self.ytmean = mode(np.round(x), axis=1).mode.ravel()
+            return None, (self.xtmean, self.ytmean)
+        else:
+            self.xtmean, self.ytmean, self.xbmean, self.ybmean = mode(np.round(x), axis=1).mode.ravel()
+            return None, (self.xtmean, self.ytmean, self.xbmean, self.ybmean)
 
 
 def worker(args, q_ind, q_value, r_ind, r_value):
@@ -50,7 +70,9 @@ def worker(args, q_ind, q_value, r_ind, r_value):
 
             de = None
             if args.extract_density:
-                de = DensityExtractor(images_filelist[0], args)
+                # de = DensityExtractor(images_filelist[0], args)
+                # de.create_grid()
+                de = GaussianDensityExtractor(images_filelist[0], args)
                 de.create_grid()
 
             # Extract all ground truths
@@ -107,7 +129,7 @@ def worker(args, q_ind, q_value, r_ind, r_value):
                         de.estimate(x)
                     if args.point_estimate:
                         v = np.linalg.norm(
-                            [de.xtmean - gt[0] - gt[2]/2, de.ytmean - gt[1] - gt[3]/2], axis=0)
+                            [de.xtmean - gt[1] - gt[3]/2, de.ytmean - gt[2] - gt[4]/2], axis=0)
                         results_dir.append(v)
                     else:
                         v = np.linalg.norm([de.xtmean - gt[1],

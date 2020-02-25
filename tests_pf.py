@@ -24,11 +24,11 @@ def test_pf(args):
     R_values = [r*np.eye(rn) for r in R_values]
 
     fixed_q = Q_values[2]
-    Parallel(n_jobs=1)(delayed(worker)(args, 2, fixed_q, r_ind, r_value)
+    Parallel(n_jobs=4)(delayed(worker)(args, 2, fixed_q, r_ind, r_value)
                        for r_ind, r_value in enumerate(R_values))
 
     fixed_r = R_values[2]
-    Parallel(n_jobs=1)(delayed(worker)(args, q_ind, q_value, 2, fixed_r)
+    Parallel(n_jobs=4)(delayed(worker)(args, q_ind, q_value, 2, fixed_r)
                        for q_ind, q_value in enumerate(Q_values))
 
 

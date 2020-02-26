@@ -18,9 +18,9 @@ os.makedirs("results", exist_ok=True)
 
 def test_pf(args):
     n = 4 if args.point_estimate else 8
-    from constants import Q_values, R_values
+    from constants import Q_values_pf as Q_values, R_values_pf as R_values
     Q_values = [q*np.eye(n) for q in Q_values]
-    rn = 2 if args.point_estimate else 2
+    rn = 2 if args.point_estimate else 4
     R_values = [r*np.eye(rn) for r in R_values]
 
     fixed_q = Q_values[2]
@@ -48,7 +48,7 @@ class GaussianDensityExtractor:
             return None, (self.xtmean, self.ytmean)
         else:
             self.xtmean, self.ytmean, self.xbmean, self.ybmean = mode(np.round(x), axis=1).mode.ravel()
-            return None, (self.xtmean, self.ytmean, self.xbmean, self.ybmean)
+            return None, None, (self.xtmean, self.ytmean), (self.xbmean, self.ybmean)
 
 
 def worker(args, q_ind, q_value, r_ind, r_value):

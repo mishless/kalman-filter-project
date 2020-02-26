@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import csv
 from find_datasets import get_iou
 import argparse
-from constants import R_values, Q_values
+from constants import R_values_pf as R_values, Q_values_pf as Q_values
 
 # Particle Filter results with Tiny YOLO and varying R
 
@@ -93,7 +93,7 @@ for i, R_value in enumerate(R_values):
     j = 2
     Q_value = 1
     try:
-        with open(f"results/pf_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+        with open(f"results/pf_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
             results[R_value] = pickle.load(f)
             if keys is None:
                 keys = list(results[R_value].keys())
@@ -125,7 +125,7 @@ for j, Q_value in enumerate(Q_values):
     i = 2
     R_value = 1
     try:
-        with open(f"results/pf_point_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
+        with open(f"results/pf_R_{i}_Q_{j}_{args.object_detector}.pickle", 'rb') as f:
             results[Q_value] = pickle.load(f)
             if keys is None:
                 keys = list(results[Q_value].keys())

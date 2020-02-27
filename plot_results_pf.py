@@ -116,7 +116,7 @@ for k, v in res.items():
         plt.ylabel("Distance")
     print()
     plt.legend()
-    plt.savefig(f"results/{k}-varying-R.pdf", format="pdf", bbox_inches='tight')
+    plt.savefig(f"results/pf_{k}-varying-R.pdf", format="pdf", bbox_inches='tight')
     plt.clf()
 
 res = {}

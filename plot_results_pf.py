@@ -16,7 +16,7 @@ parser.add_argument("object_detector", choices=['ssd', 'yolo_full', 'yolo_tiny']
                     help="Specify which object detector was used in experiment")
 args = parser.parse_args()
 res = {}
-print("Particle Filter Box tracking with R values 0.001, 0.01, 1, 10, 1000")
+print(f"Particle Filter Box tracking with R values {R_values}")
 for i, R_value in enumerate(R_values):
     j = 2
     Q_value = 1
@@ -52,7 +52,7 @@ for k, v in res.items():
     print()
 
 
-print("Particle Filter Box tracking with Q values 0.001, 0.01, 1, 10, 1000")
+print(f"Particle Filter Box tracking with Q values {Q_values}")
 res = {}
 for j, Q_value in enumerate(Q_values):
     i = 2
@@ -88,7 +88,7 @@ for k, v in res.items():
         print(f"{v1.count(0)}/600", end = ' & ')
     print()
 res = {}
-print("Particle Filter point tracking with R values 0.001, 0.01, 1, 10, 1000")
+print(f"Particle Filter point tracking with R values {R_values}")
 for i, R_value in enumerate(R_values):
     j = 2
     Q_value = 1
@@ -120,7 +120,7 @@ for k, v in res.items():
     plt.clf()
 
 res = {}
-print("Particle Filter point tracking with Q values 0.001, 0.01, 1, 10, 1000")
+print(f"Particle Filter point tracking with Q values {Q_values}")
 for j, Q_value in enumerate(Q_values):
     i = 2
     R_value = 1
